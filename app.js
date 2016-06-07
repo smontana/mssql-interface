@@ -1,60 +1,45 @@
+require('dotenv').load();
 var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-
-var routes = require('./routes/index');
-var users = require('./routes/users');
-
 var app = express();
 
-// view engine setup
-app.set('views', path.join(__dirname, 'views'));
-app.set('view engine', 'jade');
+require('./lib/logging')(app);
+require('./lib/request_parsing')(app);
+// require('./lib/static')(app);
+// require('./lib/views')(app);
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(cookieParser());
-app.use(express.static(path.join(__dirname, 'public')));
+// var connection = require('./db/connection');
 
-app.use('/', routes);
-app.use('/users', users);
+// require('./lib/routing')(app, connection);
+// require('./lib/routing')(app);
+require('./lib/errors')(app); // error handles must load after app routes
 
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
+// ------- START OF SQL SERVER CONNECTION ------- \\
+
+var Connection = require('tedious').Connection;
+var Request = require('tedious').Request;
+
+var config = {
+  server: process.env.DB_SERVER,
+  userName: process.env.DB_UN,
+  password: process.env.DB_PW,
+
+  option: {
+    database: process.env.DB_NAME
+    // encrypt: true ----for Azure users
+  }
+};
+
+var connection = new Connection(config);
+
+connection.on('connect', function(err) {
+  if (err) {
+    throw err;
+  } else {
+    // executeStatement();
+    console.log('ALL GOOD!');
+  }
 });
 
-// error handlers
-
-// development error handler
-// will print stacktrace
-if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-      message: err.message,
-      error: err
-    });
-  });
-}
-
-// production error handler
-// no stacktraces leaked to user
-app.use(function(err, req, res, next) {
-  res.status(err.status || 500);
-  res.render('error', {
-    message: err.message,
-    error: {}
-  });
-});
-
+// ------- END OF SQL SERVER CONNECTION ------- \\
 
 module.exports = app;
