@@ -4,13 +4,11 @@ var app = express();
 
 require('./lib/logging')(app);
 require('./lib/request_parsing')(app);
-// require('./lib/static')(app);
-// require('./lib/views')(app);
-
-// var connection = require('./db/connection');
+require('./lib/static')(app);
+require('./lib/views')(app);
 
 // require('./lib/routing')(app, connection);
-// require('./lib/routing')(app);
+require('./lib/routing')(app);
 require('./lib/errors')(app); // error handles must load after app routes
 
 // ------- START OF SQL SERVER CONNECTION ------- \\
