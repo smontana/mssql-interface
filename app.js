@@ -13,29 +13,23 @@ require('./lib/errors')(app); // error handles must load after app routes
 
 // ------- START OF SQL SERVER CONNECTION ------- \\
 
-var Connection = require('tedious').Connection;
-var Request = require('tedious').Request;
+var sql = require('seriate');
 
 var config = {
-  server: process.env.DB_SERVER,
-  userName: process.env.DB_UN,
+  user: process.env.DB_UN,
   password: process.env.DB_PW,
-
-  option: {
-    database: process.env.DB_NAME
-    // encrypt: true ----for Azure users
-  }
+  host: process.env.DB_SERVER,
+  database: process.env.DB_NAME
 };
 
-var connection = new Connection(config);
+sql.setDefaultConfig(config);
 
-connection.on('connect', function(err) {
-  if (err) {
-    throw err;
-  } else {
-    // executeStatement();
-    console.log('ALL GOOD!');
-  }
+sql.execute( {
+  query: "SELECT EMPFullName FROM dbo.Employee WHERE EMPActive = '1' AND EMPSolution = 'CRM'"
+}).then( function( data ) {
+  console.log(data);
+}, function( err ) {
+  console.log( err );
 });
 
 // ------- END OF SQL SERVER CONNECTION ------- \\
